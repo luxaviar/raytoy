@@ -13,6 +13,8 @@ public:
     void Add(std::shared_ptr<Hittable> object) { objects.push_back(object); }
 
     virtual bool Hit(const Ray& r, XFloat tmin, XFloat tmax, HitResult& rec) const override;
+    XFloat PDFValue(const Vec3f& o, const Vec3f& v) const override;
+    Vec3f Random(const Vec3f &o) const override;
 
 public:
     std::vector<std::shared_ptr<Hittable>> objects;
@@ -33,3 +35,19 @@ bool HittableList::Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& rec)
 
     return hit_anything;
 }
+
+XFloat HittableList::PDFValue(const Vec3f& o, const Vec3f& v) const {
+    auto weight = 1.0 / objects.size();
+    auto sum = 0.0;
+
+    for (const auto& object : objects)
+        sum += weight * object->PDFValue(o, v);
+
+    return sum;
+}
+
+Vec3f HittableList::Random(const Vec3f &o) const {
+    auto int_size = static_cast<int>(objects.size());
+    return objects[math::random::Random(0, int_size-1)]->Random(o);
+}
+

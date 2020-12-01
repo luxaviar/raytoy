@@ -13,7 +13,6 @@
 #include "texture.h"
 #include "aarect.h"
 #include "box.h"
-#include "constant_medium.h"
 
 HittableList gen_scene() {
     HittableList world;
@@ -21,35 +20,34 @@ HittableList gen_scene() {
     auto red   = std::make_shared<Lambertian>(Color(.65, .05, .05));
     auto white = std::make_shared<Lambertian>(Color(.73, .73, .73));
     auto green = std::make_shared<Lambertian>(Color(.12, .45, .15));
-    auto light = std::make_shared<DiffuseLight>(Color(7,7,7));
+    auto light = std::make_shared<DiffuseLight>(Color(15,15,15));
 
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 0, green));
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 555, red));
-    //world.Add(std::make_shared<AARect<math::Axis::kY>>(113, 443, 127, 432, 554, light));
-    world.Add(std::make_shared<FlipFace>(std::make_shared<AARect<math::Axis::kY>>(113, 443, 127, 432, 554, light)));
+    world.Add(std::make_shared<FlipFace>(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, light)));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 555, white));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 0, white));
     world.Add(std::make_shared<AARect<math::Axis::kZ>>(0, 555, 0, 555, 555, white));
 
     std::shared_ptr<Hittable> box1 = std::make_shared<Box>(Vec3f(192,165,295 + 82.5), Quaternion::AngleAxis(-15, Vec3f::up), Vec3f(82.5,165,82.5), white);
+    world.Add(box1);
+
     std::shared_ptr<Hittable> box2 = std::make_shared<Box>(Vec3f(367,0 + 82.5,65 + 82.5), Quaternion::AngleAxis(18, Vec3f::up), Vec3f(82.5,82.5,82.5), white);
-    
-    world.Add(std::make_shared<ConstantMedium>(box1, 0.01, Color(0,0,0)));
-    world.Add(std::make_shared<ConstantMedium>(box2, 0.01, Color(1,1,1)));
+    world.Add(box2);
 
     return world;
 }
 
 int main() {
     // Render
-    Renderer r(200, 50);
+    Renderer r(100, 50);
     
     // World
     auto world = gen_scene();
     r.BuildBVH(world);
 
     // Image
-    constexpr auto aspect_ratio = 16.0 / 9.0;
+    constexpr auto aspect_ratio = 1.0;
     constexpr int image_width = 600;
     constexpr int image_height = static_cast<int>(image_width / aspect_ratio);
     FrameBuffer image(image_width, image_height);
@@ -62,10 +60,16 @@ int main() {
         40, //fov
         aspect_ratio, //aspect ratio
         0.0, //aperture
-        10 //dist_to_focus
+        10, //dist_to_focus
+        0,
+        1
     );
 
-    r.Render(camera, image);
+    auto lights = std::make_shared<HittableList>();
+    lights->Add(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, std::shared_ptr<Material>()));
+    lights->Add(std::make_shared<Sphere>(Vec3f(190, 90, 190), 90, std::shared_ptr<Material>()));
+
+    r.Render(camera, image, lights, 8);
 
     write_png_image("output.png", image.width(), image.height(), 3, (const void*)image.data().data(), 0);
 }

@@ -42,7 +42,7 @@ HittableList gen_scene() {
     world.Add(std::make_shared<BvhNode>(boxes1));
 
     auto light = std::make_shared<DiffuseLight>(Color(7, 7, 7));
-    world.Add(std::make_shared<AARect<math::Axis::kY>>(123, 423, 147, 412, 554, light));
+    world.Add(std::make_shared<FlipFace>(std::make_shared<AARect<math::Axis::kY>>(123, 423, 147, 412, 554, light)));
 
     auto center1 = Vec3f(400, 400, 200);
     auto center2 = center1 + Vec3f(30,0,0);
@@ -53,6 +53,7 @@ HittableList gen_scene() {
     world.Add(std::make_shared<Sphere>(Vec3f(0, 150, 145), 50, std::make_shared<Metal>(Color(0.8, 0.8, 0.9), 1.0)));
 
     auto boundary = std::make_shared<Sphere>(Vec3f(360,150,145), 70, std::make_shared<Dielectric>(1.5));
+    world.Add(boundary);
     world.Add(std::make_shared<ConstantMedium>(boundary, 0.2, Color(0.2, 0.4, 0.9)));
     boundary = std::make_shared<Sphere>(Vec3f(0,0,0), 5000, std::make_shared<Dielectric>(1.5));
     world.Add(std::make_shared<ConstantMedium>(boundary, .0001, Color(1,1,1)));
@@ -103,12 +104,7 @@ int main() {
         1
     );
 
-    r.Render(camera, image, 
-#ifdef _DEBUG
-        1);
-#else
-        8);
-#endif
+    r.Render(camera, image, nullptr, 10);
 
     write_png_image("output.png", image.width(), image.height(), 3, (const void*)image.data().data(), 0);
 }

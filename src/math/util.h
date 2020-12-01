@@ -37,11 +37,6 @@ namespace math {
         return a > b ? b : a;
     }
 
-    template<typename T>
-    T Pow(T a, T b) {
-        return ::pow(a, b);
-    }
-
     inline float Lerp(float a, float b, float t) {
         return a * (1.0f - t) + b * t;
     }
@@ -75,6 +70,50 @@ namespace math {
 
     inline bool AlmostEqual(double left, double right, double epsilon = kEpsilon) {
         return Abs(left - right) < epsilon;
+    }
+
+    inline float Pow(float a, float b) {
+        return ::pow(a, b);
+    }
+
+    inline double Pow(double a, double b) {
+        return ::pow(a, b);
+    }
+
+    inline float Sqrt(float a) {
+        return ::sqrt(a);
+    }
+
+    inline double Sqrt(double a) {
+        return ::sqrt(a);
+    }
+
+    inline float Sin(float a) {
+        return ::sin(a);
+    }
+
+    inline float ASin(float a) {
+        return ::asin(a);
+    }
+
+    inline float Cos(float a) {
+        return ::cos(a);
+    }
+
+    inline float ACos(float a) {
+        return ::acos(a);
+    }
+
+    inline float Tan(float a) {
+        return ::cos(a);
+    }
+
+    inline float ATan(float a) {
+        return ::atan(a);
+    }
+
+    inline float ATan2(float y, float x) {
+        return ::atan2(y, x);
     }
 }
 

@@ -338,11 +338,11 @@ struct Quat {
         }
 
         if (dot < 0.95f) {
-            float angle = Acos(dot);
+            float angle = acos(dot);
             float sinadiv, sinat, sinaomt;
-            sinadiv = 1.0f / Sin(angle);
-            sinat = Sin(angle * t);
-            sinaomt = Sin(angle * (1.0f - t));
+            sinadiv = 1.0f / sin(angle);
+            sinat = sin(angle * t);
+            sinaomt = sin(angle * (1.0f - t));
             tmpQuat.x = (from.x * sinaomt + tmpQuat.x * sinat) * sinadiv;
             tmpQuat.y = (from.y * sinaomt + tmpQuat.y * sinat) * sinadiv;
             tmpQuat.z = (from.z * sinaomt + tmpQuat.z * sinat) * sinadiv;
@@ -412,31 +412,6 @@ struct Quat {
         }
 
         return q.Normalize();
-    }
-
-    template<typename I>
-    Vec3<I> QuantizedEncode() const {
-        Vec3<I> ret;
-        if (w >= 0.0f) {
-            ret.x = math::QuantizedUnormEncode<I>((x + 1.0f) / 2.0f);
-            ret.y = math::QuantizedUnormEncode<I>((y + 1.0f) / 2.0f);
-            ret.z = math::QuantizedUnormEncode<I>((z + 1.0f) / 2.0f);
-        } else {
-            ret.x = math::QuantizedUnormEncode<I>((-x + 1.0f) / 2.0f);
-            ret.y = math::QuantizedUnormEncode<I>((-y + 1.0f) / 2.0f);
-            ret.z = math::QuantizedUnormEncode<I>((-z + 1.0f) / 2.0f);
-        }
-        return ret;
-    }
-
-    template<typename I>
-    static Quat<T> QuantizedDecode(Vec3<I> v) {
-        Quat<T> rot;
-        rot.x = math::QuantizedUnormDecode<I>(v.x) * 2.0f - 1.0f;
-        rot.y = math::QuantizedUnormDecode<I>(v.y) * 2.0f - 1.0f;
-        rot.z = math::QuantizedUnormDecode<I>(v.z) * 2.0f - 1.0f;
-        rot.w = math::Sqrt(1.0f - (rot.x * rot.x + rot.y * rot.y + rot.z * rot.z));
-        return rot;
     }
 };
 

@@ -24,7 +24,8 @@ HittableList gen_scene() {
 
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 0, green));
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 555, red));
-    world.Add(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, light));
+    //world.Add(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, light));
+    world.Add(std::make_shared<FlipFace>(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, light)));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 555, white));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 0, white));
     world.Add(std::make_shared<AARect<math::Axis::kZ>>(0, 555, 0, 555, 555, white));
@@ -63,7 +64,7 @@ int main() {
         10 //dist_to_focus
     );
 
-    r.Render(camera, image, 8);
+    r.Render(camera, image);
 
     write_png_image("output.png", image.width(), image.height(), 3, (const void*)image.data().data(), 0);
 }

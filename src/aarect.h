@@ -41,6 +41,8 @@ public:
     };
 
     virtual bool Hit(const Ray& r, XFloat t0, XFloat t1, HitResult& rec) const override;
+    virtual double PDFValue(const Vec3f& origin, const Vec3f& v) const override;
+    virtual Vec3f Random(const Vec3f& origin) const override;
 
 public:
     std::shared_ptr<Material> mp;
@@ -74,3 +76,35 @@ bool AARect<axis>::Hit(const Ray& r, XFloat t0, XFloat t1, HitResult& rec) const
     return true;
 }
 
+template<math::Axis axis>
+XFloat AARect<axis>::PDFValue(const Vec3f& origin, const Vec3f& v) const {
+    HitResult rec;
+    if (!Hit(Ray(origin, v), 0.001, math::kInfinite, rec))
+        return 0;
+
+    auto area = (x1-x0) * (y1-y0);
+    auto distance_squared = rec.t * rec.t * v.MagnitudeSq();
+    auto cosine = fabs(v.Normalize().Dot(rec.normal));
+
+    return distance_squared / (cosine * area);
+}
+
+template<math::Axis axis>
+Vec3f AARect<axis>::Random(const Vec3f& origin) const {
+    XFloat r1 = math::random::Random(x0,x1);
+    XFloat r2 = math::random::Random(y0,y1);
+    auto random_point = Vec3f(k);
+
+    if (axis == math::Axis::kX) {
+        random_point.y = r1;
+        random_point.z = r2;
+    } else if (axis == math::Axis::kY) {
+        random_point.x = r1;
+        random_point.z = r2;
+    } else {
+        random_point.x = r1;
+        random_point.y = r2;
+    }
+
+    return (random_point - origin).Normalize();
+}

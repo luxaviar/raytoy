@@ -1,6 +1,8 @@
 #pragma once
 
 #include "hittable.h"
+#include "onb.h"
+#include "pdf.h"
 
 class Sphere : public Hittable {
 public:
@@ -13,6 +15,8 @@ public:
     };
 
     virtual bool Hit(const Ray& r, XFloat tmin, XFloat tmax, HitResult& rec) const override;
+    XFloat PDFValue(const Vec3f& o, const Vec3f& v) const override;
+    Vec3f Random(const Vec3f& o) const override;
 
     static Vec2f GetUV(const Vec3f& p);
 public:
@@ -69,4 +73,23 @@ bool Sphere::Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& res) const
     }
 
     return false;
+}
+
+XFloat Sphere::PDFValue(const Vec3f& o, const Vec3f& v) const {
+    HitResult rec;
+    if (!Hit(Ray(o, v), 0.001, math::kInfinite, rec))
+        return 0;
+
+    auto cos_theta_max = sqrt(1 - radius*radius/(center-o).MagnitudeSq());
+    auto solid_angle = 2 * math::kPI * (1-cos_theta_max);
+
+    return  1 / solid_angle;
+}
+
+Vec3f Sphere::Random(const Vec3f& o) const {
+     Vec3f direction = center - o;
+     auto distance_squared = direction.MagnitudeSq();
+     ONB uvw;
+     uvw.BuildFromW(direction);
+     return uvw.local(random_to_sphere(radius, distance_squared));
 }

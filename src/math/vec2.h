@@ -99,7 +99,7 @@ struct Vec2 {
     }
 
     T Magnitude() const {
-        return math::Sqrt(MagnitudeSq());
+        return sqrt(MagnitudeSq());
     }
 
     T Dot(const Vec2<T>& v) const {
@@ -138,7 +138,7 @@ struct Vec2 {
     }
 
     Vec2<T> Sqrt() const {
-        return Vec2<T>(math::Sqrt(x), math::Sqrt(y));
+        return Vec2<T>(sqrt(x), sqrt(y));
     }
 
     T Cross(const Vec2<T>& v) const {
