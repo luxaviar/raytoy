@@ -79,7 +79,7 @@ HittableList gen_scene() {
 
 int main() {
     // Render
-    Renderer r(1000, 50, Color::zero);
+    Renderer r(2000, 50, Color::zero);
     
     // World
     auto world = gen_scene();
@@ -106,7 +106,7 @@ int main() {
 
     auto lights = std::make_shared<HittableList>();
     lights->Add(std::make_shared<AARect<math::Axis::kY>>(123, 423, 147, 412, 554, std::shared_ptr<Material>()));
-    r.Render(camera, image, lights, 10);
+    r.Render(camera, image, lights, 10, 128);
 
     write_png_image("output.png", image.width(), image.height(), 3, (const void*)image.data().data(), 0);
 }

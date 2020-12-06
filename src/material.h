@@ -53,7 +53,7 @@ public:
 
     virtual bool Scatter(const Ray& r_in, const HitResult& rec, ScatterRecord& srec) const override {
         Vec3f reflected = Vec3f::Reflect(r_in.direction.Normalize(), rec.normal);
-        srec.specular_ray = Ray(rec.p, reflected + fuzz * math::random::Vector(), r_in.time);
+        srec.specular_ray = Ray(rec.p, reflected + fuzz  * math::random::PointInsideUnitSphere(), r_in.time);
         srec.attenuation = albedo;
         srec.is_specular = true;
         srec.pdf_ptr = nullptr;

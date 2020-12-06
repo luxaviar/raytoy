@@ -46,33 +46,25 @@ bool Sphere::Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& res) const
     auto c = oc.MagnitudeSq() - radius*radius;
     auto discriminant = half_b*half_b - a*c;
 
-    if (discriminant > 0) {
-        auto root = sqrt(discriminant);
+    if (discriminant < 0 ) return false;
 
-        auto temp = (-half_b - root) / a;
-        if (temp < t_max && temp > t_min) {
-            res.t = temp;
-            res.p = r.at(res.t);
-            Vec3f outward_normal = (res.p - center) / radius;
-            res.SetFaceNormal(r, outward_normal);
-            res.uv = GetUV(outward_normal);
-            res.mat_ptr = mat_ptr;
-            return true;
-        }
+    auto sqrtd = sqrt(discriminant);
+    auto root = (-half_b - sqrtd) / a;
 
-        temp = (-half_b + root) / a;
-        if (temp < t_max && temp > t_min) {
-            res.t = temp;
-            res.p = r.at(res.t);
-            Vec3f outward_normal = (res.p - center) / radius;
-            res.SetFaceNormal(r, outward_normal);
-            res.uv = GetUV(outward_normal);
-            res.mat_ptr = mat_ptr;
-            return true;
+    if (root < t_min || root > t_max) {
+        root = (-half_b + sqrtd) / a;
+        if (root < t_min || root > t_max) {
+            return false;
         }
     }
 
-    return false;
+    res.t = root;
+    res.p = r.at(res.t);
+    Vec3f outward_normal = (res.p - center).Normalize();
+    res.SetFaceNormal(r, outward_normal);
+    res.uv = GetUV(outward_normal);
+    res.mat_ptr = mat_ptr;
+    return true;
 }
 
 XFloat Sphere::PDFValue(const Vec3f& o, const Vec3f& v) const {
@@ -87,7 +79,7 @@ XFloat Sphere::PDFValue(const Vec3f& o, const Vec3f& v) const {
 }
 
 Vec3f Sphere::Random(const Vec3f& o) const {
-     Vec3f direction = center - o;
+     Vec3f direction = o - center;
      auto distance_squared = direction.MagnitudeSq();
      ONB uvw;
      uvw.BuildFromW(direction);
