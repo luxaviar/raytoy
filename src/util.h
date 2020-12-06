@@ -52,16 +52,22 @@ inline Color ACESToneMapping(Color color, XFloat adapted_lum=1.0f) {
     return (color * (A * color + B)) / (color * (C * color + D) + E);
 }
 
-math::Vec3<uint8_t> SdrColor(Color color, XFloat inv_samples_per_pixel) {
+inline void CanoicalColor(Color& color) {
     // Replace NaN components with zero. See explanation in Ray Tracing: The Rest of Your Life.
     if (color.r != color.r) color.r = 0.0;
     if (color.g != color.g) color.g = 0.0;
     if (color.b != color.b) color.b = 0.0;
+    
+    color.r = math::Clamp(color.r, 0.0, 1.0);
+    color.g = math::Clamp(color.g, 0.0, 1.0);
+    color.b = math::Clamp(color.b, 0.0, 1.0);
+}
 
+math::Vec3<uint8_t> SdrColor(Color color, XFloat inv_samples_per_pixel) {
     // Divide the color by the number of samples and gamma-correct for gamma=2.0.
     color *= inv_samples_per_pixel;
 
     color = LinearToGammaSpace(color);
     
-    return math::Vec3<uint8_t>(255 * math::Saturate(color.r), 255 * math::Saturate(color.g), 255 * math::Saturate(color.b));
+    return math::Vec3<uint8_t>(256 * math::Clamp(color.r, 0.0, 0.999), 256 * math::Clamp(color.g, 0.0, 0.999), 256 * math::Clamp(color.b, 0.0, 0.999));
 }

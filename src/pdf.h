@@ -107,7 +107,12 @@ public:
     }
 
     virtual Vec3f Generate() const override {
-        return math::random::UnitVector();
+        auto r1 = math::random::Random<XFloat>();
+        auto r2 = math::random::Random<XFloat>();
+        auto x = cos(2 * math::kPI * r1) * 2 * sqrt(r2 * (1-r2));
+        auto y = sin(2 * math::kPI * r1) * 2 * sqrt(r2 * (1-r2));
+        auto z = 1 - 2 * r2;
+        return Vec3f(x, y, z);
     }
 
 public:

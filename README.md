@@ -23,6 +23,10 @@ Thanks [Ray Tracing in One Weekend](https://raytracing.github.io/) for such grea
 
 ![cornell](samples/cornell.png)
 
+![cornell](samples/cornell_aluminum.png)
+
+![cornell](samples/cornell_glass.png)
+
 **Cornell Box with blocks of smoke**
 
 ![smoke](samples/cornell_smoke.png)

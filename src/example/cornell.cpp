@@ -64,7 +64,9 @@ int main() {
         10 //dist_to_focus
     );
 
-    r.Render(camera, image);
+    auto lights = std::make_shared<HittableList>();
+    lights->Add(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, std::shared_ptr<Material>()));
+    r.Render(camera, image, lights);
 
     write_png_image("output.png", image.width(), image.height(), 3, (const void*)image.data().data(), 0);
 }

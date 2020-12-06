@@ -24,6 +24,7 @@ HittableList gen_scene() {
 
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 0, green));
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 555, red));
+    //world.Add(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, light));
     world.Add(std::make_shared<FlipFace>(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, light)));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 555, white));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 0, white));
@@ -32,7 +33,9 @@ HittableList gen_scene() {
     std::shared_ptr<Hittable> box1 = std::make_shared<Box>(Vec3f(192,165,295 + 82.5), Quaternion::AngleAxis(-15, Vec3f::up), Vec3f(82.5,165,82.5), white);
     world.Add(box1);
 
-    std::shared_ptr<Hittable> box2 = std::make_shared<Box>(Vec3f(367,0 + 82.5,65 + 82.5), Quaternion::AngleAxis(18, Vec3f::up), Vec3f(82.5,82.5,82.5), white);
+    auto glass = std::make_shared<Dielectric>(1.5);
+    std::shared_ptr<Hittable> box2 = std::make_shared<Sphere>(Vec3f(367,0 + 82.5,65 + 82.5), 90, glass);
+    
     world.Add(box2);
 
     return world;
@@ -40,14 +43,14 @@ HittableList gen_scene() {
 
 int main() {
     // Render
-    Renderer r(100, 50);
+    Renderer r(1000, 50);
     
     // World
     auto world = gen_scene();
     r.BuildBVH(world);
 
     // Image
-    constexpr auto aspect_ratio = 1.0;
+    constexpr auto aspect_ratio = 16.0 / 9.0;
     constexpr int image_width = 600;
     constexpr int image_height = static_cast<int>(image_width / aspect_ratio);
     FrameBuffer image(image_width, image_height);
@@ -60,16 +63,15 @@ int main() {
         40, //fov
         aspect_ratio, //aspect ratio
         0.0, //aperture
-        10, //dist_to_focus
-        0,
-        1
+        10 //dist_to_focus
     );
+    
 
     auto lights = std::make_shared<HittableList>();
     lights->Add(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, std::shared_ptr<Material>()));
     lights->Add(std::make_shared<Sphere>(Vec3f(190, 90, 190), 90, std::shared_ptr<Material>()));
 
-    r.Render(camera, image, lights, 8);
+    r.Render(camera, image, lights);
 
     write_png_image("output.png", image.width(), image.height(), 3, (const void*)image.data().data(), 0);
 }

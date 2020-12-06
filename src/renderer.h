@@ -110,7 +110,11 @@ void Renderer::CastRay(int begin, int end) {
             auto u = (i + math::random::Random<XFloat>()) * spec_.inv_width;
             auto v = (j + math::random::Random<XFloat>()) * spec_.inv_height;
             Ray r = spec_.camera->CastRay(u, v);
-            pixel_color += Trace(r, spec_.max_depth);
+            
+            Color color = Trace(r, spec_.max_depth);
+            CanoicalColor(color);
+
+            pixel_color += color;
         }
 
         spec_.image->Set(i, (spec_.height - 1) - j, SdrColor(pixel_color, spec_.inv_samples_per_pixel));
@@ -160,7 +164,7 @@ void Renderer::Render(const Camera& camera, FrameBuffer& image, std::shared_ptr<
                     begin = rs.begin;
                     end = rs.end;
                     jobs.pop_back();
-                    std::cerr << jobs.size() << '\r';
+                    std::cerr << jobs.size() << "      \r";
                 }
                 CastRay(begin, end);
             }
