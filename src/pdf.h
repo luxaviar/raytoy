@@ -78,7 +78,7 @@ public:
 
 class MixturePDF : public PDF {
     public:
-        MixturePDF(std::shared_ptr<PDF> p0, std::shared_ptr<PDF> p1) {
+        MixturePDF(PDF* p0, PDF* p1) {
             p[0] = p0;
             p[1] = p1;
         }
@@ -95,7 +95,7 @@ class MixturePDF : public PDF {
         }
 
     public:
-        std::shared_ptr<PDF> p[2];
+        PDF* p[2];
 };
 
 class SpherePDF : public PDF {

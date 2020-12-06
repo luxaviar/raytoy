@@ -84,8 +84,8 @@ Color Renderer::Trace(const Ray& r, int depth) {
     }
 
     if (lights_) {
-        auto light_ptr = std::make_shared<HittablePDF>(lights_, rec.p);
-        MixturePDF p(light_ptr, srec.pdf_ptr);
+        HittablePDF light_ptr(lights_, rec.p);
+        MixturePDF p(&light_ptr, srec.pdf_ptr.get());
         Ray scattered(rec.p, p.Generate(), r.time);
         auto pdf_val = p.Value(scattered.direction);
 
