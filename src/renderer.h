@@ -19,7 +19,7 @@ struct TraceSpec {
     int width;
     int height;
     int samples_per_pixel;
-    int max_depth;
+    XFloat rr; //RussianRoulette
     XFloat inv_width;
     XFloat inv_height;
     XFloat inv_samples_per_pixel;
@@ -37,10 +37,10 @@ struct RaySpan {
 
 class Renderer : private Uncopyable {
 public:
-    Renderer(int samples_per_pixel, int max_depth, Color background_color = Color::zero) : background_color_(background_color) {
+    Renderer(int samples_per_pixel, XFloat rr = 0.8, Color background_color = Color::zero) : background_color_(background_color) {
         spec_.samples_per_pixel = samples_per_pixel;
         spec_.inv_samples_per_pixel = 1.0 / samples_per_pixel;
-        spec_.max_depth = max_depth;
+        spec_.rr = math::Clamp(rr, 0.0, 0.999);
     }
 
     TraceSpec& spec() { return spec_; }
@@ -50,7 +50,7 @@ public:
 
 private:
     void CastRay(int begin, int end);
-    Color Trace(const Ray& r, int depth);
+    Color Trace(const Ray& r);
 
     Color background_color_;
     TraceSpec spec_;
@@ -63,10 +63,10 @@ void Renderer::BuildBVH(const HittableList& world) {
     root_ = BvhNode(world);
 }
 
-Color Renderer::Trace(const Ray& r, int depth) {
+Color Renderer::Trace(const Ray& r) {
     HitResult rec;
 
-    if (depth <= 0)
+    if (math::random::Random<XFloat>() > spec_.rr)
         return Color(0, 0, 0);
 
     if (!root_.Hit(r, 0.001, math::kInfinite, rec)) {
@@ -80,7 +80,7 @@ Color Renderer::Trace(const Ray& r, int depth) {
         return emitted;
 
     if (srec.is_specular) {
-        return srec.attenuation * Trace(srec.specular_ray, depth-1);
+        return srec.attenuation * Trace(srec.specular_ray);
     }
 
     if (lights_) {
@@ -90,13 +90,13 @@ Color Renderer::Trace(const Ray& r, int depth) {
         auto pdf_val = p.Value(scattered.direction);
 
         return emitted + 
-            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered, depth-1) / pdf_val;
+            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered) / (pdf_val * spec_.rr);
     } else {
         Ray scattered(rec.p, srec.pdf_ptr->Generate(), r.time);
         auto pdf_val = srec.pdf_ptr->Value(scattered.direction);
 
         return emitted + 
-            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered, depth-1) / pdf_val;
+            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered) / (pdf_val * spec_.rr);
     }
 }
 
@@ -111,7 +111,7 @@ void Renderer::CastRay(int begin, int end) {
             auto v = (j + math::random::Random<XFloat>()) * spec_.inv_height;
             Ray r = spec_.camera->CastRay(u, v);
             
-            Color color = Trace(r, spec_.max_depth);
+            Color color = Trace(r);
             CanoicalColor(color);
 
             pixel_color += color;

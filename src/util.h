@@ -58,9 +58,9 @@ inline void CanoicalColor(Color& color) {
     if (color.g != color.g) color.g = 0.0;
     if (color.b != color.b) color.b = 0.0;
     
-    color.r = math::Clamp(color.r, 0.0, 1.0);
-    color.g = math::Clamp(color.g, 0.0, 1.0);
-    color.b = math::Clamp(color.b, 0.0, 1.0);
+    // color.r = math::Clamp(color.r, 0.0, 1.0);
+    // color.g = math::Clamp(color.g, 0.0, 1.0);
+    // color.b = math::Clamp(color.b, 0.0, 1.0);
 }
 
 math::Vec3<uint8_t> SdrColor(Color color, XFloat inv_samples_per_pixel) {

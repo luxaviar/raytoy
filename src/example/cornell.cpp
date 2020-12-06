@@ -41,7 +41,7 @@ HittableList gen_scene() {
 
 int main() {
     // Render
-    Renderer r(1000, 50);
+    Renderer r(1000);
     
     // World
     auto world = gen_scene();

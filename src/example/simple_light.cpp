@@ -29,7 +29,7 @@ HittableList gen_scene() {
 
 int main() {
     // Render
-    Renderer r(400, 50);
+    Renderer r(400);
     
     // World
     auto world = gen_scene();

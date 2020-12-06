@@ -84,7 +84,7 @@ class MixturePDF : public PDF {
         }
 
         virtual double Value(const Vec3f& direction) const override {
-            return 0.5 * p[0]->Value(direction) + 0.5 *p[1]->Value(direction);
+            return 0.5 * p[0]->Value(direction) + 0.5 * p[1]->Value(direction);
         }
 
         virtual Vec3f Generate() const override {
