@@ -42,7 +42,7 @@ HittableList gen_scene() {
     world.Add(std::make_shared<BvhNode>(boxes1));
 
     auto light = std::make_shared<DiffuseLight>(Color(7, 7, 7));
-    world.Add(std::make_shared<FlipFace>(std::make_shared<AARect<math::Axis::kY>>(123, 423, 147, 412, 554, light)));
+    world.Add(std::make_shared<AARect<math::Axis::kY, false>>(123, 423, 147, 412, 554, light));
 
     auto center1 = Vec3f(400, 400, 200);
     auto center2 = center1 + Vec3f(30,0,0);
@@ -79,11 +79,11 @@ HittableList gen_scene() {
 
 int main() {
     // Render
-    Renderer r(10000, 0.9);
+    Renderer r(10000);
     
     // World
     auto world = gen_scene();
-    r.BuildBVH(world);
+    r.BuildWorld(world);
 
     // Image
     constexpr auto aspect_ratio = 1.0;
@@ -104,9 +104,7 @@ int main() {
         1
     );
 
-    auto lights = std::make_shared<HittableList>();
-    lights->Add(std::make_shared<AARect<math::Axis::kY>>(123, 423, 147, 412, 554, std::shared_ptr<Material>()));
-    r.Render(camera, image, nullptr, 10, 128);
+    r.Render(camera, image, 10, 128);
 
     write_png_image("output.png", image.width(), image.height(), 3, (const void*)image.data().data(), 0);
 }

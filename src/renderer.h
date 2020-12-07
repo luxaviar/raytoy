@@ -19,7 +19,8 @@ struct TraceSpec {
     int width;
     int height;
     int samples_per_pixel;
-    XFloat rr; //RussianRoulette
+    // XFloat rr; //RussianRoulette
+    int depth;
     XFloat inv_width;
     XFloat inv_height;
     XFloat inv_samples_per_pixel;
@@ -37,39 +38,44 @@ struct RaySpan {
 
 class Renderer : private Uncopyable {
 public:
-    Renderer(int samples_per_pixel, XFloat rr = 0.8, Color background_color = Color::zero) : background_color_(background_color) {
+    Renderer(int samples_per_pixel, Color background_color = Color::zero, int depth = 50) : 
+        background_color_(background_color), 
+        lights_(std::make_shared<HittableList>()) 
+    {
         spec_.samples_per_pixel = samples_per_pixel;
         spec_.inv_samples_per_pixel = 1.0 / samples_per_pixel;
-        spec_.rr = math::Clamp(rr, 0.0, 0.999);
+        spec_.depth = depth;
     }
 
     TraceSpec& spec() { return spec_; }
-    void BuildBVH(const HittableList& world);
+    void BuildWorld(const HittableList& world);
+    std::shared_ptr<HittableList> lights() { return lights_; }
 
-    void Render(const Camera& camera, FrameBuffer& image, std::shared_ptr<Hittable> lights=nullptr, int parallel = 8, int span=256);
+    void Render(const Camera& camera, FrameBuffer& image, int parallel = 8, int span=256);
 
 private:
     void CastRay(int begin, int end);
-    Color Trace(const Ray& r);
+    Color Trace(const Ray& r, int depth);
 
     Color background_color_;
     TraceSpec spec_;
-    BvhNode root_;
+    std::shared_ptr<BvhNode> root_;
     std::mutex mutex_;
-    std::shared_ptr<Hittable> lights_;
+    std::shared_ptr<HittableList> lights_;
 };
 
-void Renderer::BuildBVH(const HittableList& world) {
-    root_ = BvhNode(world);
+void Renderer::BuildWorld(const HittableList& world) {
+    root_ = std::make_shared<BvhNode>(world);
+    root_->FetchLight(lights_);
 }
 
-Color Renderer::Trace(const Ray& r) {
+Color Renderer::Trace(const Ray& r, int depth) {
     HitResult rec;
 
-    if (math::random::Random<XFloat>() > spec_.rr)
+    if (depth < 0)
         return Color(0, 0, 0);
 
-    if (!root_.Hit(r, 0.001, math::kInfinite, rec)) {
+    if (!root_->Hit(r, 0.001, math::kInfinite, rec)) {
         return background_color_;
     }
 
@@ -80,7 +86,7 @@ Color Renderer::Trace(const Ray& r) {
         return emitted;
 
     if (srec.is_specular) {
-        return srec.attenuation * Trace(srec.specular_ray);
+        return srec.attenuation * Trace(srec.specular_ray, depth - 1);
     }
 
     if (lights_) {
@@ -89,14 +95,14 @@ Color Renderer::Trace(const Ray& r) {
         Ray scattered(rec.p, p.Generate(), r.time);
         auto pdf_val = p.Value(scattered.direction);
 
-        return emitted + 
-            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered) / (pdf_val * spec_.rr);
+        return emitted +
+            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered, depth - 1) / pdf_val;
     } else {
         Ray scattered(rec.p, srec.pdf_ptr->Generate(), r.time);
         auto pdf_val = srec.pdf_ptr->Value(scattered.direction);
 
         return emitted + 
-            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered) / (pdf_val * spec_.rr);
+            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered, depth - 1) / pdf_val;
     }
 }
 
@@ -111,7 +117,7 @@ void Renderer::CastRay(int begin, int end) {
             auto v = (j + math::random::Random<XFloat>()) * spec_.inv_height;
             Ray r = spec_.camera->CastRay(u, v);
             
-            Color color = Trace(r);
+            Color color = Trace(r, spec_.depth);
             CanoicalColor(color);
 
             pixel_color += color;
@@ -121,13 +127,12 @@ void Renderer::CastRay(int begin, int end) {
     }
 }
 
-void Renderer::Render(const Camera& camera, FrameBuffer& image, std::shared_ptr<Hittable> lights, int parallel, int span) {
+void Renderer::Render(const Camera& camera, FrameBuffer& image, int parallel, int span) {
     auto begin = std::chrono::steady_clock::now();
 
     int width = image.width();
     int height = image.height();
 
-    lights_ = lights;
     spec_.width = width;
     spec_.height = height;
     spec_.inv_width = 1.0f / (width - 1);

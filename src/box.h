@@ -7,7 +7,7 @@
 class Box : public Hittable {
 public:
     Box(const Vec3f& pos, const Quaternion& rot, const Vec3f& extents_, std::shared_ptr<Material> mat) : 
-    transform(pos, rot), extent(extents_), mat_ptr(mat) 
+    Hittable(mat), transform(pos, rot), extent(extents_)
     {
         const Matrix3x3& axis = transform.rotation.Inverse().ToMatrix();
         Vec3f ext = axis.r0.Abs() * extents_.x + axis.r1.Abs() * extents_.y + axis.r2.Abs() * extents_.z;
@@ -18,7 +18,6 @@ public:
 
     Vec3f extent;
     Transform transform;
-    std::shared_ptr<Material> mat_ptr;
 };
 
 bool Box::Hit(const Ray& r, XFloat tmin, XFloat tmax, HitResult& rec) const {
@@ -63,7 +62,7 @@ bool Box::Hit(const Ray& r, XFloat tmin, XFloat tmax, HitResult& rec) const {
 
     rec.t = t;
     rec.p = r.at(t);
-    rec.mat_ptr = mat_ptr;
+    rec.mat_ptr = mat_ptr_;
 
     return true;
 }

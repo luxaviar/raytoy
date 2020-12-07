@@ -33,7 +33,7 @@ int main() {
     
     // World
     auto world = gen_scene();
-    r.BuildBVH(world);
+    r.BuildWorld(world);
 
     // Image
     constexpr auto aspect_ratio = 16.0 / 9.0;

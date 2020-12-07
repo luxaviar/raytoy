@@ -7,13 +7,13 @@
 #include "hittable.h"
 #include "math/axis.h"
 
-template<math::Axis axis>
+template<math::Axis axis, bool face_positive=true>
 class AARect : public Hittable {
 public:
     AARect() {}
 
     AARect(XFloat _x0, XFloat _x1, XFloat _y0, XFloat _y1, XFloat _k, std::shared_ptr<Material> mat) : 
-        x0(_x0), x1(_x1), y0(_y0), y1(_y1), k(_k), mp(mat) 
+        Hittable(mat), x0(_x0), x1(_x1), y0(_y0), y1(_y1), k(_k)
     {
         ik = static_cast<typename std::underlying_type<math::Axis>::type>(axis);
         if (ik == 0) {
@@ -41,19 +41,18 @@ public:
     };
 
     virtual bool Hit(const Ray& r, XFloat t0, XFloat t1, HitResult& rec) const override;
-    virtual double PDFValue(const Vec3f& origin, const Vec3f& v) const override;
-    virtual Vec3f Random(const Vec3f& origin) const override;
+    virtual double PDF(const Vec3f& origin, const Vec3f& v) const override;
+    virtual Vec3f Sample(const Vec3f& origin) const override;
 
 public:
-    std::shared_ptr<Material> mp;
     int ix, iy, ik;
     XFloat x0, x1;
     XFloat y0, y1;
     XFloat k;
 };
 
-template<math::Axis axis>
-bool AARect<axis>::Hit(const Ray& r, XFloat t0, XFloat t1, HitResult& rec) const {
+template<math::Axis axis, bool face_positive>
+bool AARect<axis, face_positive>::Hit(const Ray& r, XFloat t0, XFloat t1, HitResult& rec) const {
     auto t = (k - r.origin[ik]) / r.direction[ik];
     if (t < t0 || t > t1)
         return false;
@@ -68,16 +67,16 @@ bool AARect<axis>::Hit(const Ray& r, XFloat t0, XFloat t1, HitResult& rec) const
     rec.t = t;
 
     Vec3f outward_normal(0.0);
-    outward_normal[ik] = 1;
+    outward_normal[ik] = face_positive ? 1 : -1;
     rec.SetFaceNormal(r, outward_normal);
-    rec.mat_ptr = mp;
+    rec.mat_ptr = mat_ptr_;
     rec.p = r.at(t);
 
     return true;
 }
 
-template<math::Axis axis>
-XFloat AARect<axis>::PDFValue(const Vec3f& origin, const Vec3f& v) const {
+template<math::Axis axis, bool face_positive>
+XFloat AARect<axis, face_positive>::PDF(const Vec3f& origin, const Vec3f& v) const {
     HitResult rec;
     if (!Hit(Ray(origin, v), 0.001, math::kInfinite, rec))
         return 0;
@@ -89,8 +88,8 @@ XFloat AARect<axis>::PDFValue(const Vec3f& origin, const Vec3f& v) const {
     return distance_squared / (cosine * area);
 }
 
-template<math::Axis axis>
-Vec3f AARect<axis>::Random(const Vec3f& origin) const {
+template<math::Axis axis, bool face_positive>
+Vec3f AARect<axis, face_positive>::Sample(const Vec3f& origin) const {
     XFloat r1 = math::random::Random(x0,x1);
     XFloat r2 = math::random::Random(y0,y1);
     auto random_point = Vec3f(k);

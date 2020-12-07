@@ -18,6 +18,7 @@ set(COMMON_ALL
   src/common/transform.cpp
   src/concurrent/thread_pool.cpp
   src/math/random.cpp
+  src/hittable.cpp
 )
 
 # Executables

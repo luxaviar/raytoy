@@ -24,6 +24,8 @@ public:
     virtual Color Emitted(const Ray& r_in, const HitResult& rec, XFloat u, XFloat v, const Vec3f& p) const {
         return Color::zero;
     }
+
+    virtual bool IsLight() const { return false; }
 };
 
 class Lambertian : public Material {
@@ -117,6 +119,8 @@ public:
             return Color(0,0,0);
         return emit->Value(u, v, p);
     }
+
+    virtual bool IsLight() const override { return true; }
 
 public:
     std::shared_ptr<Texture> emit;

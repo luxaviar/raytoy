@@ -17,14 +17,12 @@ struct ONB {
         return a.x * u() + a.y * v() + a.z * w();
     }
 
-    void BuildFromW(const Vec3f&);
+    void BuildFromW(const Vec3f& n) {
+        axis[2] = n.Normalize();
+        Vec3f a = (fabs(w().x) > 0.9) ? Vec3f(0,1,0) : Vec3f(1,0,0);
+        axis[1] = w().Cross(a).Normalize();
+        axis[0] = w().Cross(v());
+    }
 
     Vec3f axis[3];
 };
-
-void ONB::BuildFromW(const Vec3f& n) {
-    axis[2] = n.Normalize();
-    Vec3f a = (fabs(w().x) > 0.9) ? Vec3f(0,1,0) : Vec3f(1,0,0);
-    axis[1] = w().Cross(a).Normalize();
-    axis[0] = w().Cross(v());
-}

@@ -6,6 +6,7 @@
 #include "math/vec2.h"
 
 class Material;
+class HittableList;
 
 struct HitResult {
     Vec3f p;
@@ -21,15 +22,18 @@ struct HitResult {
     }
 };
 
-class Hittable {
+class Hittable : public std::enable_shared_from_this<Hittable> {
 public:
+    Hittable() {}
+    Hittable(std::shared_ptr<Material> m) : mat_ptr_(m) { }
+
     virtual bool Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& rec) const = 0;
 
-    virtual double PDFValue(const Vec3f& o, const Vec3f& v) const {
+    virtual double PDF(const Vec3f& o, const Vec3f& v) const {
         return 0.0;
     }
 
-    virtual Vec3f Random(const Vec3f& o) const {
+    virtual Vec3f Sample(const Vec3f& o) const {
         return Vec3f(1,0,0);
     }
 
@@ -37,24 +41,9 @@ public:
         return bounding_box_;
     };
 
+    virtual void FetchLight(std::shared_ptr<HittableList> lights);
+
 protected:
+    std::shared_ptr<Material> mat_ptr_;
     AABB bounding_box_;
-};
-
-class FlipFace : public Hittable {
-public:
-    FlipFace(std::shared_ptr<Hittable> p) : ptr(p) {
-        bounding_box_ = p->bounding_box();
-    }
-
-    virtual bool Hit(const Ray& r, double t_min, double t_max, HitResult& rec) const override {
-        if (!ptr->Hit(r, t_min, t_max, rec))
-            return false;
-
-        rec.front_face = !rec.front_face;
-        return true;
-    }
-
-public:
-    std::shared_ptr<Hittable> ptr;
 };

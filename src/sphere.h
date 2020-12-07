@@ -9,20 +9,19 @@ public:
     Sphere() {}
 
     Sphere(Vec3f cen, XFloat r, std::shared_ptr<Material> m)
-        : center(cen), radius(r), mat_ptr(m)
+        : Hittable(m), center(cen), radius(r)
     {
         bounding_box_ = AABB(center - radius, center + radius);
     };
 
     virtual bool Hit(const Ray& r, XFloat tmin, XFloat tmax, HitResult& rec) const override;
-    XFloat PDFValue(const Vec3f& o, const Vec3f& v) const override;
-    Vec3f Random(const Vec3f& o) const override;
+    XFloat PDF(const Vec3f& o, const Vec3f& v) const override;
+    Vec3f Sample(const Vec3f& o) const override;
 
     static Vec2f GetUV(const Vec3f& p);
 public:
     Vec3f center;
     XFloat radius;
-    std::shared_ptr<Material> mat_ptr;
 };
 
 Vec2f Sphere::GetUV(const Vec3f& p) {
@@ -63,11 +62,11 @@ bool Sphere::Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& res) const
     Vec3f outward_normal = (res.p - center).Normalize();
     res.SetFaceNormal(r, outward_normal);
     res.uv = GetUV(outward_normal);
-    res.mat_ptr = mat_ptr;
+    res.mat_ptr = mat_ptr_;
     return true;
 }
 
-XFloat Sphere::PDFValue(const Vec3f& o, const Vec3f& v) const {
+XFloat Sphere::PDF(const Vec3f& o, const Vec3f& v) const {
     HitResult rec;
     if (!Hit(Ray(o, v), 0.001, math::kInfinite, rec))
         return 0;
@@ -78,7 +77,7 @@ XFloat Sphere::PDFValue(const Vec3f& o, const Vec3f& v) const {
     return  1 / solid_angle;
 }
 
-Vec3f Sphere::Random(const Vec3f& o) const {
+Vec3f Sphere::Sample(const Vec3f& o) const {
      Vec3f direction = o - center;
      auto distance_squared = direction.MagnitudeSq();
      ONB uvw;

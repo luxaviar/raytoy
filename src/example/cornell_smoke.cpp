@@ -26,7 +26,7 @@ HittableList gen_scene() {
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 0, green));
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 555, red));
     //world.Add(std::make_shared<AARect<math::Axis::kY>>(113, 443, 127, 432, 554, light));
-    world.Add(std::make_shared<FlipFace>(std::make_shared<AARect<math::Axis::kY>>(113, 443, 127, 432, 554, light)));
+    world.Add(std::make_shared<AARect<math::Axis::kY, false>>(113, 443, 127, 432, 554, light));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 555, white));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 0, white));
     world.Add(std::make_shared<AARect<math::Axis::kZ>>(0, 555, 0, 555, 555, white));
@@ -46,7 +46,7 @@ int main() {
     
     // World
     auto world = gen_scene();
-    r.BuildBVH(world);
+    r.BuildWorld(world);
 
     // Image
     constexpr auto aspect_ratio = 16.0 / 9.0;
@@ -65,9 +65,7 @@ int main() {
         10 //dist_to_focus
     );
 
-    auto lights = std::make_shared<HittableList>();
-    lights->Add(std::make_shared<AARect<math::Axis::kY>>(113, 443, 127, 432, 554, std::shared_ptr<Material>()));
-    r.Render(camera, image, lights);
+    r.Render(camera, image);
 
     write_png_image("output.png", image.width(), image.height(), 3, (const void*)image.data().data(), 0);
 }

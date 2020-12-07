@@ -59,14 +59,14 @@ public:
 
     virtual double Value(const Vec3f& direction) const override {
         if (ptr)
-            return ptr->PDFValue(o, direction);
+            return ptr->PDF(o, direction);
         else
             return 0.0;
     }
 
     virtual Vec3f Generate() const override {
         if (ptr)
-            return ptr->Random(o);
+            return ptr->Sample(o);
         else
             return Vec3f(1, 0, 0);
     }
