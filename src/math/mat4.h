@@ -174,8 +174,8 @@ struct Mat4x4 {
             r0 + v.r0,
             r1 + v.r1,
             r2 + v.r2,
-            r3 + v.r3,
-        )
+            r3 + v.r3
+        );
     }
 
     Mat4x4<T>& operator *=(const Mat4x4<T>& v) {
@@ -205,7 +205,7 @@ struct Mat4x4 {
     }
 
     Mat4x4<T> operator *(T v) const {
-        return Mat4xr<T>(
+        return Mat4x4<T>(
             r0 * v,
             r1 * v,
             r2 * v,

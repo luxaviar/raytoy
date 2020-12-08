@@ -65,8 +65,14 @@ private:
 };
 
 void Renderer::BuildWorld(const HittableList& world) {
-    root_ = std::make_shared<BvhNode>(world);
-    root_->FetchLight(lights_);
+    root_ = std::make_shared<BvhNode>(world.objects, 0, world.objects.size());
+
+    std::vector<std::shared_ptr<Hittable>> lights;
+    root_->FetchLight(lights);
+
+    for (auto l : lights) {
+        lights_->Add(l);
+    }
 }
 
 Color Renderer::Trace(const Ray& r, int depth) {
@@ -91,15 +97,21 @@ Color Renderer::Trace(const Ray& r, int depth) {
 
     if (lights_) {
         HittablePDF light_ptr(lights_, rec.p);
-        MixturePDF p(&light_ptr, srec.pdf_ptr.get());
-        Ray scattered(rec.p, p.Generate(), r.time);
-        auto pdf_val = p.Value(scattered.direction);
+        MixturePDF mp(&light_ptr, srec.pdf_ptr.get());
+        XFloat pdf_val;
+        auto wo = mp.Sample(r.direction, pdf_val);
+        Ray scattered(rec.p, wo, r.time);
+        // Ray scattered(rec.p, p.Generate(), r.time);
+        // auto pdf_val = p.Value(scattered.direction);
 
         return emitted +
             srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered, depth - 1) / pdf_val;
     } else {
-        Ray scattered(rec.p, srec.pdf_ptr->Generate(), r.time);
-        auto pdf_val = srec.pdf_ptr->Value(scattered.direction);
+        // Ray scattered(rec.p, srec.pdf_ptr->Generate(), r.time);
+        // auto pdf_val = srec.pdf_ptr->Value(scattered.direction);        XFloat pdf_val;
+        XFloat pdf_val;
+        auto wo = srec.pdf_ptr->Sample(r.direction, pdf_val);
+        Ray scattered(rec.p, wo, r.time);
 
         return emitted + 
             srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered, depth - 1) / pdf_val;

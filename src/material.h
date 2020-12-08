@@ -139,7 +139,7 @@ public:
     virtual bool Scatter(const Ray& r_in, const HitResult& rec, ScatterRecord& srec) const override {
         srec.is_specular = false;
         srec.attenuation = albedo->Value(rec.uv.u, rec.uv.v, rec.p);
-        srec.pdf_ptr = std::make_shared<SpherePDF>(rec.p);
+        srec.pdf_ptr = std::make_shared<SphericalPDF>(rec.p);
         return true;
     }
 

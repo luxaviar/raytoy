@@ -18,7 +18,7 @@
 
 HittableList gen_scene() {
     HittableList world;
-    HittableList boxes1;
+    auto boxes1 = std::make_shared<HittableList>();
     auto ground = std::make_shared<Lambertian>(Color(0.48, 0.83, 0.53));
 
     const int boxes_per_side = 20;
@@ -35,11 +35,11 @@ HittableList gen_scene() {
             auto pos = (Vec3f(x1, y1, z1) + Vec3f(x0, y0, z0)) / 2;
             auto ext = (Vec3f(x1, y1, z1) - Vec3f(x0, y0, z0)) / 2;
 
-            boxes1.Add(std::make_shared<Box>(pos, Quaternion::identity, ext, ground));
+            boxes1->Add(std::make_shared<Box>(pos, Quaternion::identity, ext, ground));
         }
     }
 
-    world.Add(std::make_shared<BvhNode>(boxes1));
+    world.Add(boxes1);
 
     auto light = std::make_shared<DiffuseLight>(Color(7, 7, 7));
     world.Add(std::make_shared<AARect<math::Axis::kY, false>>(123, 423, 147, 412, 554, light));
@@ -63,23 +63,23 @@ HittableList gen_scene() {
     auto pertext = std::make_shared<NoiseTexture>(0.1);
     world.Add(std::make_shared<Sphere>(Vec3f(220,280,300), 80, std::make_shared<Lambertian>(pertext)));
 
-    HittableList boxes2;
+    auto boxes2 = std::make_shared<HittableList>();
     auto white = std::make_shared<Lambertian>(Color(.73, .73, .73));
     int ns = 1000;
     for (int j = 0; j < ns; j++) {
         auto pos = math::random::Vector(0,165);
         pos = Quaternion::AngleAxis(15, Vec3f::up) * pos;
-        boxes2.Add(std::make_shared<Sphere>(pos + Vec3f(-100,270,395), 10, white));
+        boxes2->Add(std::make_shared<Sphere>(pos + Vec3f(-100,270,395), 10, white));
     }
 
-    world.Add(std::make_shared<BvhNode>(boxes2));
+    world.Add(boxes2);
 
     return world;
 }
 
 int main() {
     // Render
-    Renderer r(10000);
+    Renderer r(100);
     
     // World
     auto world = gen_scene();

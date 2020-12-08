@@ -12,6 +12,7 @@ Thanks [Ray Tracing in One Weekend](https://raytracing.github.io/) for such grea
 
 * Multi-threaded acceleration
 * OBB(Oriented Bounding Box) support
+* Triangle mesh support
 
 ## Example
 
@@ -38,3 +39,9 @@ Thanks [Ray Tracing in One Weekend](https://raytracing.github.io/) for such grea
 **All**
 
 ![all](samples/final.png)
+
+**Mesh**
+
+![all](samples/bunny.png)
+
+![all](samples/bunny_glass.png)

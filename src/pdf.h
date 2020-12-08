@@ -2,6 +2,7 @@
 
 #include "onb.h"
 #include "hittable.h"
+#include "ray.h"
 
 inline Vec3f random_cosine_direction() {
     auto r1 = math::random::Random<XFloat>();
@@ -33,7 +34,7 @@ public:
     virtual ~PDF() {}
 
     virtual double Value(const Vec3f& direction) const = 0;
-    virtual Vec3f Generate() const = 0;
+    virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const = 0;
 };
 
 class CosinePDF : public PDF {
@@ -45,8 +46,10 @@ public:
         return (cosine <= 0) ? 0 : cosine/math::kPI;
     }
 
-    virtual Vec3f Generate() const override {
-        return uvw.local(random_cosine_direction());
+    virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const {
+        auto wo = uvw.local(random_cosine_direction());
+        pdf = Value(wo);
+        return wo;
     }
 
 public:
@@ -58,17 +61,13 @@ public:
     HittablePDF(std::shared_ptr<Hittable> p, const Vec3f& origin) : ptr(p), o(origin) {}
 
     virtual double Value(const Vec3f& direction) const override {
-        if (ptr)
-            return ptr->PDF(o, direction);
-        else
-            return 0.0;
+        return ptr->PDF(o, direction);
     }
 
-    virtual Vec3f Generate() const override {
-        if (ptr)
-            return ptr->Sample(o);
-        else
-            return Vec3f(1, 0, 0);
+    virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const {
+        auto wo = ptr->Sample(o);
+        pdf = Value(wo);
+        return wo;
     }
 
 public:
@@ -87,32 +86,40 @@ class MixturePDF : public PDF {
             return 0.5 * p[0]->Value(direction) + 0.5 * p[1]->Value(direction);
         }
 
-        virtual Vec3f Generate() const override {
-            if (math::random::Random<XFloat>() < 0.5)
-                return p[0]->Generate();
-            else
-                return p[1]->Generate();
+        virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const {
+            Vec3f wo;
+            if (math::random::Random<XFloat>() < 0.5) {
+                wo = p[0]->Sample(wi, pdf);
+            } else {
+                wo = p[1]->Sample(wi, pdf);;
+            }
+            
+            pdf = Value(wo);
+
+            return wo;
         }
 
     public:
         PDF* p[2];
 };
 
-class SpherePDF : public PDF {
+class SphericalPDF : public PDF {
 public:
-    SpherePDF(const Vec3f& origin) : o(origin) {}
+    SphericalPDF(const Vec3f& origin) : o(origin) {}
 
     virtual double Value(const Vec3f& direction) const override {
         return 1.0 / (4 * math::kPI);
     }
 
-    virtual Vec3f Generate() const override {
+    virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const {
         auto r1 = math::random::Random<XFloat>();
         auto r2 = math::random::Random<XFloat>();
         auto x = cos(2 * math::kPI * r1) * 2 * sqrt(r2 * (1-r2));
         auto y = sin(2 * math::kPI * r1) * 2 * sqrt(r2 * (1-r2));
         auto z = 1 - 2 * r2;
-        return Vec3f(x, y, z);
+        auto wo = Vec3f(x, y, z);
+        pdf = Value(wo);
+        return wo;
     }
 
 public:

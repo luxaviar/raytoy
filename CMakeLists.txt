@@ -19,6 +19,9 @@ set(COMMON_ALL
   src/concurrent/thread_pool.cpp
   src/math/random.cpp
   src/hittable.cpp
+  src/bvh.cpp
+  src/mesh.cpp
+  src/triangle.cpp
 )
 
 # Executables
@@ -33,6 +36,7 @@ add_executable(cornell_smoke src/example/cornell_smoke.cpp ${COMMON_ALL})
 add_executable(cornell_aluminum src/example/cornell_aluminum.cpp ${COMMON_ALL})
 add_executable(cornell_glass src/example/cornell_glass.cpp ${COMMON_ALL})
 add_executable(final src/example/final.cpp ${COMMON_ALL})
+add_executable(bunny src/example/bunny.cpp ${COMMON_ALL})
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     TARGET_LINK_LIBRARIES(random_sphere pthread)
@@ -46,5 +50,6 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     TARGET_LINK_LIBRARIES(cornell_aluminum pthread)
     TARGET_LINK_LIBRARIES(cornell_glass pthread)
     TARGET_LINK_LIBRARIES(final pthread)
+    TARGET_LINK_LIBRARIES(bunny pthread)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 

@@ -68,7 +68,7 @@ bool ConstantMedium::Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& re
 
     rec.normal = Vec3f(1,0,0);  // arbitrary
     rec.front_face = true;     // also arbitrary
-    rec.mat_ptr = phase_function;
+    rec.mat_ptr = phase_function.get();
 
     return true;
 }

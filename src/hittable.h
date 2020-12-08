@@ -1,17 +1,17 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include "ray.h"
 #include "aabb.h"
 #include "math/vec2.h"
 
 class Material;
-class HittableList;
 
 struct HitResult {
     Vec3f p;
     Vec3f normal;
-    std::shared_ptr<Material> mat_ptr;
+    Material* mat_ptr;
     XFloat t;
     Vec2f uv;
     bool front_face;
@@ -29,7 +29,7 @@ public:
 
     virtual bool Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& rec) const = 0;
 
-    virtual double PDF(const Vec3f& o, const Vec3f& v) const {
+    virtual XFloat PDF(const Vec3f& o, const Vec3f& v) const {
         return 0.0;
     }
 
@@ -41,7 +41,8 @@ public:
         return bounding_box_;
     };
 
-    virtual void FetchLight(std::shared_ptr<HittableList> lights);
+    virtual void FetchLight(std::vector<std::shared_ptr<Hittable>>& lights);
+    virtual void BuildBVH() {};
 
 protected:
     std::shared_ptr<Material> mat_ptr_;

@@ -45,7 +45,7 @@ public:
         Vec3f offset = u * rd.x + v * rd.y;
         return Ray(
             origin + offset,
-            lower_left_corner + s*horizontal + t*vertical - origin - offset,
+            (lower_left_corner + s*horizontal + t*vertical - origin - offset).Normalize(),
             math::random::Random<XFloat>(time0, time1)
         );
     }

@@ -62,7 +62,7 @@ bool Sphere::Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& res) const
     Vec3f outward_normal = (res.p - center).Normalize();
     res.SetFaceNormal(r, outward_normal);
     res.uv = GetUV(outward_normal);
-    res.mat_ptr = mat_ptr_;
+    res.mat_ptr = mat_ptr_.get();
     return true;
 }
 

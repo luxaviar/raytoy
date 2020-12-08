@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include "math/random.h"
+#include "bvh.h"
 
 class HittableList : public Hittable  {
 public:
@@ -14,48 +15,54 @@ public:
     bool empty() const { return objects.size() == 0; }
 
     void Clear() { objects.clear(); }
-    void Add(std::shared_ptr<Hittable> object) { objects.push_back(object); }
-        
-    bool HittableList::Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& rec) const override {
-        HitResult temp_rec;
-        auto hit_anything = false;
-        auto closest_so_far = t_max;
-
-        for (const auto& object : objects) {
-            if (object->Hit(r, t_min, closest_so_far, temp_rec)) {
-                hit_anything = true;
-                closest_so_far = temp_rec.t;
-                rec = temp_rec;
-            }
+    void Add(std::shared_ptr<Hittable> object) {
+        objects.push_back(object); 
+        if (objects.size() == 1) {
+            bounding_box_ = object->bounding_box();
+        } else {
+            bounding_box_ = AABB::Union(bounding_box_, object->bounding_box());
         }
-
-        return hit_anything;
     }
 
-    XFloat HittableList::PDF(const Vec3f& o, const Vec3f& v) const override {
+    void BuildBVH() override {
+        if (objects.empty()) return;
+
+        root = std::make_shared<BvhNode>(objects, 0, objects.size());
+    }
+
+    bool Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& rec) const override {
+        if (!root) return false;
+        return root->Hit(r, t_min, t_max, rec);
+    }
+
+    XFloat PDF(const Vec3f& o, const Vec3f& wo) const override {
         if (empty()) return 0;
 
         auto weight = 1.0 / objects.size();
         auto sum = 0.0;
 
         for (const auto& object : objects)
-            sum += object->PDF(o, v);
+            sum += object->PDF(o, wo);
 
         return sum * weight;
     }
 
-    Vec3f HittableList::Sample(const Vec3f &o) const override {
-        if (empty()) return Vec3f::zero;
+    Vec3f Sample(const Vec3f &o) const override {
+        if (empty()) {
+            return Vec3f::zero;
+        }
         
         auto int_size = static_cast<int>(objects.size());
         return objects[math::random::Random(0, int_size-1)]->Sample(o);
     }
 
-    void HittableList::FetchLight(std::shared_ptr<HittableList> lights) override {
+    void FetchLight(std::vector<std::shared_ptr<Hittable>>& lights) override {
         for (auto& object : objects)
             object->FetchLight(lights);
     }
 
 public:
     std::vector<std::shared_ptr<Hittable>> objects;
+    std::shared_ptr<BvhNode> root;
 };
+

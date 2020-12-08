@@ -62,7 +62,7 @@ bool Box::Hit(const Ray& r, XFloat tmin, XFloat tmax, HitResult& rec) const {
 
     rec.t = t;
     rec.p = r.at(t);
-    rec.mat_ptr = mat_ptr_;
+    rec.mat_ptr = mat_ptr_.get();
 
     return true;
 }

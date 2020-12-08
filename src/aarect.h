@@ -69,21 +69,21 @@ bool AARect<axis, face_positive>::Hit(const Ray& r, XFloat t0, XFloat t1, HitRes
     Vec3f outward_normal(0.0);
     outward_normal[ik] = face_positive ? 1 : -1;
     rec.SetFaceNormal(r, outward_normal);
-    rec.mat_ptr = mat_ptr_;
+    rec.mat_ptr = mat_ptr_.get();
     rec.p = r.at(t);
 
     return true;
 }
 
 template<math::Axis axis, bool face_positive>
-XFloat AARect<axis, face_positive>::PDF(const Vec3f& origin, const Vec3f& v) const {
+XFloat AARect<axis, face_positive>::PDF(const Vec3f& origin, const Vec3f& wo) const {
     HitResult rec;
-    if (!Hit(Ray(origin, v), 0.001, math::kInfinite, rec))
+    if (!Hit(Ray(origin, wo), 0.001, math::kInfinite, rec))
         return 0;
 
     auto area = (x1-x0) * (y1-y0);
-    auto distance_squared = rec.t * rec.t * v.MagnitudeSq();
-    auto cosine = fabs(v.Normalize().Dot(rec.normal));
+    auto distance_squared = rec.t * rec.t * wo.MagnitudeSq();
+    auto cosine = fabs(wo.Normalize().Dot(rec.normal));
 
     return distance_squared / (cosine * area);
 }

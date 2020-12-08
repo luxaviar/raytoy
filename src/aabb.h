@@ -56,7 +56,7 @@ struct AABB {
     bool Compare(const AABB& other, int axis) const {
         return min[axis] < other.min[axis];
     }
-    
+
     bool Contains(const Vec3f& point) const {
         return point.x >= min.x && point.x <= max.x &&
             point.y >= min.y && point.y <= max.y &&
