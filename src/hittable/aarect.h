@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <type_traits>
 #include "math/vec3.h"
-#include "ray.h"
+#include "common/ray.h"
 #include "hittable.h"
 #include "math/axis.h"
 

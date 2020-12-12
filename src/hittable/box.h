@@ -2,7 +2,7 @@
 
 #include "hittable.h"
 #include "common/transform.h"
-#include "aabb.h"
+#include "common/aabb.h"
 
 class Box : public Hittable {
 public:

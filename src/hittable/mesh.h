@@ -7,7 +7,7 @@
 #include "math/mat4.h"
 #include "math/quat.h"
 #include "hittable.h"
-#include "vertex.h"
+#include "common/vertex.h"
 #include "common/transform.h"
 #include "bvh.h"
 #include "triangle.h"

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ray.h"
+#include "common/ray.h"
 #include "hittable.h"
-#include "vertex.h"
+#include "common/vertex.h"
 
 class Triangle : public Hittable {
 public:

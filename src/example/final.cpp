@@ -1,20 +1,20 @@
 #include <chrono>
 #include <iostream>
 #include "camera.h"
-#include "hittable_list.h"
+#include "hittable/hittable_list.h"
 #include "material.h"
-#include "sphere.h"
-#include "buffer.h"
+#include "hittable/sphere.h"
+#include "common/buffer.h"
 #include "concurrent/thread_pool.h"
 #include "common/image.h"
 #include "math/vec3.h"
 #include "util.h"
 #include "renderer.h"
 #include "texture.h"
-#include "aarect.h"
-#include "box.h"
-#include "constant_medium.h"
-#include "moving_sphere.h"
+#include "hittable/aarect.h"
+#include "hittable/box.h"
+#include "hittable/constant_medium.h"
+#include "hittable/moving_sphere.h"
 
 HittableList gen_scene() {
     HittableList world;
@@ -79,7 +79,7 @@ HittableList gen_scene() {
 
 int main() {
     // Render
-    Renderer r(100);
+    Renderer r(10000);
     
     // World
     auto world = gen_scene();

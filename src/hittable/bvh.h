@@ -2,14 +2,11 @@
 
 #include <algorithm>
 #include "hittable.h"
-// #include "hittable_list.h"
 #include "mesh.h"
 #include "math/random.h"
 
 class BvhNode : public Hittable  {
 public:
-    //BvhNode() {}
-
     BvhNode(const std::vector<std::shared_ptr<Hittable>>& src_objects, size_t start, size_t end);
 
     virtual bool Hit(const Ray& r, XFloat t_min, XFloat t_max, HitResult& rec) const override;

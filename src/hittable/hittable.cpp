@@ -1,5 +1,4 @@
 #include "hittable.h"
-//#include "hittable_list.h"
 #include "material.h"
 
 void Hittable::FetchLight(std::vector<std::shared_ptr<Hittable>>& lights) {

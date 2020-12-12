@@ -1,17 +1,17 @@
 #include <chrono>
 #include <iostream>
 #include "camera.h"
-#include "hittable_list.h"
+#include "hittable/hittable_list.h"
 #include "material.h"
-#include "sphere.h"
-#include "buffer.h"
+#include "hittable/sphere.h"
+#include "common/buffer.h"
 #include "concurrent/thread_pool.h"
 #include "common/image.h"
 #include "math/vec3.h"
 #include "util.h"
 #include "renderer.h"
 #include "texture.h"
-#include "aarect.h"
+#include "hittable/aarect.h"
 
 HittableList gen_scene() {
     HittableList world;

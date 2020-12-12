@@ -2,8 +2,8 @@
 
 #include <memory>
 #include <vector>
-#include "ray.h"
-#include "aabb.h"
+#include "common/ray.h"
+#include "common/aabb.h"
 #include "math/vec2.h"
 
 class Material;

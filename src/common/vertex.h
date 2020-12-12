@@ -1,13 +1,9 @@
 #pragma once
 
 #include <vector>
-#include "common/uncopyable.h"
 #include "math/vec2.h"
 #include "math/vec3.h"
 #include "math/vec4.h"
-#include "math/util.h"
-#include "math/axis.h"
-#include "math/mat3.h"
 
 struct Vertex {
     Vertex() : tangent(0.0f), bitangent(0.0f) {}

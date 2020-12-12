@@ -1,18 +1,18 @@
 #include <chrono>
 #include <iostream>
 #include "camera.h"
-#include "hittable_list.h"
+#include "hittable/hittable_list.h"
 #include "material.h"
-#include "sphere.h"
-#include "buffer.h"
+#include "hittable/sphere.h"
+#include "common/buffer.h"
 #include "concurrent/thread_pool.h"
 #include "common/image.h"
 #include "math/vec3.h"
 #include "util.h"
 #include "renderer.h"
 #include "texture.h"
-#include "aarect.h"
-#include "box.h"
+#include "hittable/aarect.h"
+#include "hittable/box.h"
 
 HittableList gen_scene() {
     HittableList world;
@@ -24,7 +24,6 @@ HittableList gen_scene() {
 
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 0, green));
     world.Add(std::make_shared<AARect<math::Axis::kX>>(0, 555, 0, 555, 555, red));
-    //world.Add(std::make_shared<AARect<math::Axis::kY>>(213, 343, 227, 332, 554, light));
     world.Add(std::make_shared<AARect<math::Axis::kY, false>>(213, 343, 227, 332, 554, light));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 555, white));
     world.Add(std::make_shared<AARect<math::Axis::kY>>(0, 555, 0, 555, 0, white));
@@ -41,14 +40,14 @@ HittableList gen_scene() {
 
 int main() {
     // Render
-    Renderer r(1000);
+    Renderer r(2000);
     
     // World
     auto world = gen_scene();
     r.BuildWorld(world);
 
     // Image
-    constexpr auto aspect_ratio = 16.0 / 9.0;
+    constexpr auto aspect_ratio = 1.0;
     constexpr int image_width = 600;
     constexpr int image_height = static_cast<int>(image_width / aspect_ratio);
     FrameBuffer image(image_width, image_height);

@@ -1,16 +1,9 @@
-#---------------------------------------------------------------------------------------------------
-# CMake Build Configuration for the Ray Tracing Weekend Series
-#
-# See README.md for guidance.
-#---------------------------------------------------------------------------------------------------
-
-cmake_minimum_required ( VERSION 3.1.0 )
+cmake_minimum_required(VERSION 3.1.0)
 
 project(raytoy  LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(src)
-# include_directories(src/common)
 
 # Source
 set(COMMON_ALL
@@ -18,10 +11,10 @@ set(COMMON_ALL
   src/common/transform.cpp
   src/concurrent/thread_pool.cpp
   src/math/random.cpp
-  src/hittable.cpp
-  src/bvh.cpp
-  src/mesh.cpp
-  src/triangle.cpp
+  src/hittable/hittable.cpp
+  src/hittable/bvh.cpp
+  src/hittable/mesh.cpp
+  src/hittable/triangle.cpp
 )
 
 # Executables

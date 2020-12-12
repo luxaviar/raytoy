@@ -32,6 +32,12 @@ Thanks [Ray Tracing in One Weekend](https://raytracing.github.io/) for such grea
 
 ![smoke](samples/cornell_smoke.png)
 
+**Bunny**
+
+![all](samples/bunny.png)
+
+![all](samples/bunny_glass.png)
+
 **Perlin noise & lights**
 
 ![perlin](samples/light.png)
@@ -39,9 +45,3 @@ Thanks [Ray Tracing in One Weekend](https://raytracing.github.io/) for such grea
 **All**
 
 ![all](samples/final.png)
-
-**Mesh**
-
-![all](samples/bunny.png)
-
-![all](samples/bunny_glass.png)

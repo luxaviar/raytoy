@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ray.h"
-#include "hittable.h"
+#include "common/ray.h"
+#include "hittable/hittable.h"
 #include "math/random.h"
 #include "texture.h"
 #include "pdf.h"
@@ -10,7 +10,7 @@ struct ScatterRecord {
     Ray specular_ray;
     bool is_specular;
     Color attenuation;
-    std::shared_ptr<PDF> pdf_ptr;
+    PDF* pdf_ptr;
 };
 
 class Material {
@@ -26,17 +26,24 @@ public:
     }
 
     virtual bool IsLight() const { return false; }
+
+    std::unique_ptr<PDF> pdf_ptr;
 };
 
 class Lambertian : public Material {
 public:
-    Lambertian(const Color& a) : albedo(std::make_shared<SolidColor>(a)) {}
-    Lambertian(std::shared_ptr<Texture> a) : albedo(a) {}
+    Lambertian(std::shared_ptr<Texture> a) : albedo(a) {
+        pdf_ptr = std::make_unique<CosinePDF>();
+    }
+
+    Lambertian(const Color& a) : Lambertian(std::make_shared<SolidColor>(a)) { 
+        pdf_ptr = std::make_unique<CosinePDF>();
+    }
 
     bool Scatter(const Ray& r_in, const HitResult& rec, ScatterRecord& srec) const override {
         srec.is_specular = false;
         srec.attenuation = albedo->Value(rec.uv.u, rec.uv.v, rec.p);
-        srec.pdf_ptr = std::make_shared<CosinePDF>(rec.normal);
+        srec.pdf_ptr = pdf_ptr.get();// std::make_shared<CosinePDF>(rec.normal);
         return true;
     }
 
@@ -128,8 +135,13 @@ public:
 
 class Isotropic : public Material {
 public:
-    Isotropic(Color c) : albedo(std::make_shared<SolidColor>(c)) {}
-    Isotropic(std::shared_ptr<Texture> a) : albedo(a) {}
+    Isotropic(std::shared_ptr<Texture> a) : albedo(a) {
+        pdf_ptr = std::make_unique<SphericalPDF>();
+    }
+
+    Isotropic(Color c) : albedo(std::make_shared<SolidColor>(c)) {
+        pdf_ptr = std::make_unique<SphericalPDF>();
+    }
 
     // virtual bool Scatter(const Ray& r_in, const HitResult& rec, ScatterRecord& srec) const override {
     //     scattered = Ray(rec.p, math::random::UnitVector(), r_in.time);
@@ -139,7 +151,7 @@ public:
     virtual bool Scatter(const Ray& r_in, const HitResult& rec, ScatterRecord& srec) const override {
         srec.is_specular = false;
         srec.attenuation = albedo->Value(rec.uv.u, rec.uv.v, rec.p);
-        srec.pdf_ptr = std::make_shared<SphericalPDF>(rec.p);
+        srec.pdf_ptr = pdf_ptr.get();//std::make_shared<SphericalPDF>(rec.p);
         return true;
     }
 

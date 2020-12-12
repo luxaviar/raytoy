@@ -3,7 +3,7 @@
 #include "math/vec3.h"
 #include "math/util.h"
 #include "math/random.h"
-#include "ray.h"
+#include "common/ray.h"
 
 class Camera {
 public:

@@ -5,13 +5,13 @@
 #include <cstdint>
 #include "common/uncopyable.h"
 #include "math/vec3.h"
-#include "buffer.h"
+#include "common/buffer.h"
 #include "camera.h"
-#include "hittable.h"
-#include "hittable_list.h"
+#include "hittable/hittable.h"
+#include "hittable/hittable_list.h"
+#include "hittable/bvh.h"
 #include "util.h"
 #include "concurrent/thread_pool.h"
-#include "bvh.h"
 
 using FrameBuffer = Buffer<math::Vec3<uint8_t>>;
 
@@ -76,19 +76,19 @@ void Renderer::BuildWorld(const HittableList& world) {
 }
 
 Color Renderer::Trace(const Ray& r, int depth) {
-    HitResult rec;
+    HitResult res;
 
     if (depth < 0)
         return Color(0, 0, 0);
 
-    if (!root_->Hit(r, 0.001, math::kInfinite, rec)) {
+    if (!root_->Hit(r, 0.001, math::kInfinite, res)) {
         return background_color_;
     }
 
     ScatterRecord srec;
-    Color emitted = rec.mat_ptr->Emitted(r, rec, rec.uv.u, rec.uv.v, rec.p);
+    Color emitted = res.mat_ptr->Emitted(r, res, res.uv.u, res.uv.v, res.p);
 
-    if (!rec.mat_ptr->Scatter(r, rec, srec))
+    if (!res.mat_ptr->Scatter(r, res, srec))
         return emitted;
 
     if (srec.is_specular) {
@@ -96,25 +96,21 @@ Color Renderer::Trace(const Ray& r, int depth) {
     }
 
     if (lights_) {
-        HittablePDF light_ptr(lights_, rec.p);
-        MixturePDF mp(&light_ptr, srec.pdf_ptr.get());
+        HittablePDF light_ptr(lights_);
+        MixturePDF mp(&light_ptr, srec.pdf_ptr);
         XFloat pdf_val;
-        auto wo = mp.Sample(r.direction, pdf_val);
-        Ray scattered(rec.p, wo, r.time);
-        // Ray scattered(rec.p, p.Generate(), r.time);
-        // auto pdf_val = p.Value(scattered.direction);
+        auto wo = mp.Sample(res, pdf_val);
+        Ray scattered(res.p, wo, r.time);
 
         return emitted +
-            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered, depth - 1) / pdf_val;
+            srec.attenuation * res.mat_ptr->ScatteringPDF(r, res, scattered) * Trace(scattered, depth - 1) / pdf_val;
     } else {
-        // Ray scattered(rec.p, srec.pdf_ptr->Generate(), r.time);
-        // auto pdf_val = srec.pdf_ptr->Value(scattered.direction);        XFloat pdf_val;
         XFloat pdf_val;
-        auto wo = srec.pdf_ptr->Sample(r.direction, pdf_val);
-        Ray scattered(rec.p, wo, r.time);
+        auto wo = srec.pdf_ptr->Sample(res, pdf_val);
+        Ray scattered(res.p, wo, r.time);
 
         return emitted + 
-            srec.attenuation * rec.mat_ptr->ScatteringPDF(r, rec, scattered) * Trace(scattered, depth - 1) / pdf_val;
+            srec.attenuation * res.mat_ptr->ScatteringPDF(r, res, scattered) * Trace(scattered, depth - 1) / pdf_val;
     }
 }
 
@@ -164,7 +160,7 @@ void Renderer::Render(const Camera& camera, FrameBuffer& image, int parallel, in
         jobs.emplace_back(count * span, total - 1); 
     }
 
-    std::cout << "total job count " << count << std::endl;
+    std::cout << "Total number of jobs: " << count << std::endl;
 
     ThreadPool pool(parallel);
     for (int i = 0; i < parallel; ++i) {
@@ -192,6 +188,6 @@ void Renderer::Render(const Camera& camera, FrameBuffer& image, int parallel, in
     
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double> diff = end - begin;
-    std::cerr << "finish in " << diff.count() << std::endl;
+    std::cerr << "Finish in " << diff.count() << "s" << std::endl;
 }
  

@@ -1,10 +1,10 @@
 #include <chrono>
 #include <iostream>
 #include "camera.h"
-#include "hittable_list.h"
+#include "hittable/hittable_list.h"
 #include "material.h"
-#include "sphere.h"
-#include "buffer.h"
+#include "hittable/sphere.h"
+#include "common/buffer.h"
 #include "concurrent/thread_pool.h"
 #include "common/image.h"
 #include "math/vec3.h"

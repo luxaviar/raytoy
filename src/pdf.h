@@ -1,8 +1,8 @@
 #pragma once
 
 #include "onb.h"
-#include "hittable.h"
-#include "ray.h"
+#include "hittable/hittable.h"
+#include "common/ray.h"
 
 inline Vec3f random_cosine_direction() {
     auto r1 = math::random::Random<XFloat>();
@@ -15,7 +15,6 @@ inline Vec3f random_cosine_direction() {
 
     return Vec3f(x, y, z);
 }
-
 
 inline Vec3f random_to_sphere(double radius, double distance_squared) {
     auto r1 = math::random::Random<XFloat>();
@@ -33,46 +32,44 @@ class PDF  {
 public:
     virtual ~PDF() {}
 
-    virtual double Value(const Vec3f& direction) const = 0;
-    virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const = 0;
+    virtual double Value(const HitResult& res, const Vec3f& direction) const = 0;
+    virtual Vec3f Sample(const HitResult& res, XFloat& pdf) const = 0;
 };
 
 class CosinePDF : public PDF {
 public:
-    CosinePDF(const Vec3f& w) { uvw.BuildFromW(w); }
+    CosinePDF() { }
 
-    virtual double Value(const Vec3f& direction) const override {
-        auto cosine = direction.Normalize().Dot(uvw.w());
+    virtual double Value(const HitResult& res, const Vec3f& direction) const override {
+        auto cosine = direction.Dot(res.normal);
         return (cosine <= 0) ? 0 : cosine/math::kPI;
     }
 
-    virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const {
+    virtual Vec3f Sample(const HitResult& res, XFloat& pdf) const {
+        ONB uvw;
+        uvw.BuildFromW(res.normal);
         auto wo = uvw.local(random_cosine_direction());
-        pdf = Value(wo);
+        pdf = Value(res, wo);
         return wo;
     }
-
-public:
-    ONB uvw;
 };
 
 class HittablePDF : public PDF {
 public:
-    HittablePDF(std::shared_ptr<Hittable> p, const Vec3f& origin) : ptr(p), o(origin) {}
+    HittablePDF(std::shared_ptr<Hittable> p) : ptr(p) {}
 
-    virtual double Value(const Vec3f& direction) const override {
-        return ptr->PDF(o, direction);
+    virtual double Value(const HitResult& res, const Vec3f& direction) const override {
+        return ptr->PDF(res.p, direction);
     }
 
-    virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const {
-        auto wo = ptr->Sample(o);
-        pdf = Value(wo);
+    virtual Vec3f Sample(const HitResult& res, XFloat& pdf) const {
+        auto wo = ptr->Sample(res.p);
+        pdf = Value(res, wo);
         return wo;
     }
 
 public:
     std::shared_ptr<Hittable> ptr;
-    Vec3f o;
 };
 
 class MixturePDF : public PDF {
@@ -82,19 +79,19 @@ class MixturePDF : public PDF {
             p[1] = p1;
         }
 
-        virtual double Value(const Vec3f& direction) const override {
-            return 0.5 * p[0]->Value(direction) + 0.5 * p[1]->Value(direction);
+        virtual double Value(const HitResult& res, const Vec3f& direction) const override {
+            return 0.5 * p[0]->Value(res, direction) + 0.5 * p[1]->Value(res, direction);
         }
 
-        virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const {
+        virtual Vec3f Sample(const HitResult& res, XFloat& pdf) const {
             Vec3f wo;
             if (math::random::Random<XFloat>() < 0.5) {
-                wo = p[0]->Sample(wi, pdf);
+                wo = p[0]->Sample(res, pdf);
             } else {
-                wo = p[1]->Sample(wi, pdf);;
+                wo = p[1]->Sample(res, pdf);;
             }
             
-            pdf = Value(wo);
+            pdf = Value(res, wo);
 
             return wo;
         }
@@ -105,24 +102,21 @@ class MixturePDF : public PDF {
 
 class SphericalPDF : public PDF {
 public:
-    SphericalPDF(const Vec3f& origin) : o(origin) {}
+    SphericalPDF() {}
 
-    virtual double Value(const Vec3f& direction) const override {
+    virtual double Value(const HitResult& res, const Vec3f& direction) const override {
         return 1.0 / (4 * math::kPI);
     }
 
-    virtual Vec3f Sample(const Vec3f& wi, XFloat& pdf) const {
+    virtual Vec3f Sample(const HitResult& res, XFloat& pdf) const {
         auto r1 = math::random::Random<XFloat>();
         auto r2 = math::random::Random<XFloat>();
         auto x = cos(2 * math::kPI * r1) * 2 * sqrt(r2 * (1-r2));
         auto y = sin(2 * math::kPI * r1) * 2 * sqrt(r2 * (1-r2));
         auto z = 1 - 2 * r2;
         auto wo = Vec3f(x, y, z);
-        pdf = Value(wo);
+        pdf = Value(res, wo);
         return wo;
     }
-
-public:
-    Vec3f o;
 };
 
