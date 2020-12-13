@@ -97,7 +97,7 @@ private:
 
         // return math::Lerp(y1, y2, w.z);
 
-        auto w = p * p * (3.0 - 2.0 * p);
+        auto w = p * p * ((XFloat)3.0 - (XFloat)2.0 * p);
         auto accum = 0.0;
 
         for (int i=0; i < 2; i++)

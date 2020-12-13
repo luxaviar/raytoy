@@ -17,7 +17,7 @@ class Material {
 public:
     virtual bool Scatter(const Ray& r_in, const HitResult& rec, ScatterRecord& srec) const = 0;
     
-    virtual double ScatteringPDF(const Ray& r_in, const HitResult& rec, const Ray& scattered) const {
+    virtual XFloat ScatteringPDF(const Ray& r_in, const HitResult& rec, const Ray& scattered) const {
         return 0;
     }
 
@@ -104,7 +104,7 @@ public:
     XFloat ir; // Index of Refraction
 
 private:
-    static double reflectance(XFloat cosine, XFloat ref_idx) {
+    static XFloat reflectance(XFloat cosine, XFloat ref_idx) {
         // Use Schlick's approximation for reflectance.
         auto r0 = (1-ref_idx) / (1+ref_idx);
         r0 = r0*r0;
@@ -155,7 +155,7 @@ public:
         return true;
     }
 
-    virtual double ScatteringPDF(const Ray& r_in, const HitResult& rec, const Ray& scattered) const {
+    virtual XFloat ScatteringPDF(const Ray& r_in, const HitResult& rec, const Ray& scattered) const {
         return 1.0 / (4.0 * math::kPI);
     }
 

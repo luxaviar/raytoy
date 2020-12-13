@@ -9,7 +9,7 @@ struct ONB {
     const Vec3f& v() const { return axis[1]; }
     const Vec3f& w() const { return axis[2]; }
 
-    Vec3f local(double a, double b, double c) const {
+    Vec3f local(XFloat a, XFloat b, XFloat c) const {
         return a * u() + b * v() + c * w();
     }
 

@@ -341,13 +341,13 @@ struct Vec3 {
     }
 
     static Vec3<T> Reflect(const Vec3<T>& i, const Vec3<T>& n) {
-        return i - 2.0 * n.Dot(i) * n;
+        return i - 2.0f * n.Dot(i) * n;
     }
 
     static Vec3<T> Refract(const Vec3<T>& uv, const Vec3<T>& n, T etai_over_etat) {
-        auto cos_theta = fmin(n.Dot(-uv), 1.0);
+        auto cos_theta = fmin(n.Dot(-uv), 1.0f);
         Vec3<T> r_out_perp =  etai_over_etat * (uv + cos_theta * n);
-        Vec3<T> r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.MagnitudeSq())) * n;
+        Vec3<T> r_out_parallel = -sqrt(fabs(1.0f - r_out_perp.MagnitudeSq())) * n;
         return r_out_perp + r_out_parallel;
     }
 };

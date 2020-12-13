@@ -16,7 +16,7 @@ inline Vec3f random_cosine_direction() {
     return Vec3f(x, y, z);
 }
 
-inline Vec3f random_to_sphere(double radius, double distance_squared) {
+inline Vec3f random_to_sphere(XFloat radius, XFloat distance_squared) {
     auto r1 = math::random::Random<XFloat>();
     auto r2 = math::random::Random<XFloat>();
     auto z = 1 + r2 * (sqrt(1 - radius * radius / distance_squared) - 1);
@@ -32,7 +32,7 @@ class PDF  {
 public:
     virtual ~PDF() {}
 
-    virtual double Value(const HitResult& res, const Vec3f& direction) const = 0;
+    virtual XFloat Value(const HitResult& res, const Vec3f& direction) const = 0;
     virtual Vec3f Sample(const HitResult& res, XFloat& pdf) const = 0;
 };
 
@@ -40,7 +40,7 @@ class CosinePDF : public PDF {
 public:
     CosinePDF() { }
 
-    virtual double Value(const HitResult& res, const Vec3f& direction) const override {
+    virtual XFloat Value(const HitResult& res, const Vec3f& direction) const override {
         auto cosine = direction.Dot(res.normal);
         return (cosine <= 0) ? 0 : cosine/math::kPI;
     }
@@ -58,7 +58,7 @@ class HittablePDF : public PDF {
 public:
     HittablePDF(std::shared_ptr<Hittable> p) : ptr(p) {}
 
-    virtual double Value(const HitResult& res, const Vec3f& direction) const override {
+    virtual XFloat Value(const HitResult& res, const Vec3f& direction) const override {
         return ptr->PDF(res.p, direction);
     }
 
@@ -79,7 +79,7 @@ class MixturePDF : public PDF {
             p[1] = p1;
         }
 
-        virtual double Value(const HitResult& res, const Vec3f& direction) const override {
+        virtual XFloat Value(const HitResult& res, const Vec3f& direction) const override {
             return 0.5 * p[0]->Value(res, direction) + 0.5 * p[1]->Value(res, direction);
         }
 
@@ -104,7 +104,7 @@ class SphericalPDF : public PDF {
 public:
     SphericalPDF() {}
 
-    virtual double Value(const HitResult& res, const Vec3f& direction) const override {
+    virtual XFloat Value(const HitResult& res, const Vec3f& direction) const override {
         return 1.0 / (4 * math::kPI);
     }
 

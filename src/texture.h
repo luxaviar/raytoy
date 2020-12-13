@@ -37,7 +37,7 @@ public:
     CheckerTexture(Color c1, Color c2)
         : even(std::make_shared<SolidColor>(c1)) , odd(std::make_shared<SolidColor>(c2)) {}
 
-    virtual Color Value(double u, double v, const Vec3f& p) const override {
+    virtual Color Value(XFloat u, XFloat v, const Vec3f& p) const override {
         auto sines = sin(10 * p.x) * sin(10 * p.y) * sin(10 * p.z);
         if (sines < 0)
             return odd->Value(u, v, p);
@@ -53,9 +53,9 @@ public:
 class NoiseTexture : public Texture {
 public:
     NoiseTexture() {}
-    NoiseTexture(double sc) : scale(sc) {}
+    NoiseTexture(XFloat sc) : scale(sc) {}
 
-    virtual Color Value(double u, double v, const Vec3f& p) const override {
+    virtual Color Value(XFloat u, XFloat v, const Vec3f& p) const override {
         // return color(1,1,1)*0.5*(1 + noise.turb(scale * p));
         // return color(1,1,1)*noise.turb(scale * p);
         return Color(1,1,1)*0.5*(1 + sin(scale * p.z + 10*noise.Turb(p)));
@@ -63,7 +63,7 @@ public:
 
 public:
     Perlin noise;
-    double scale;
+    XFloat scale;
 };
 
 class ImageTexture : public Texture {

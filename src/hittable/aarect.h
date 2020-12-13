@@ -41,7 +41,7 @@ public:
     };
 
     virtual bool Hit(const Ray& r, XFloat t0, XFloat t1, HitResult& rec) const override;
-    virtual double PDF(const Vec3f& origin, const Vec3f& v) const override;
+    virtual XFloat PDF(const Vec3f& origin, const Vec3f& v) const override;
     virtual Vec3f Sample(const Vec3f& origin) const override;
 
 public:

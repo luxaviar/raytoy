@@ -8,7 +8,7 @@ struct Ray {
         : origin(origin_), direction(direction_), time(0)
     {}
 
-    Ray(const Vec3f& origin_, const Vec3f& direction_, double time_)
+    Ray(const Vec3f& origin_, const Vec3f& direction_, XFloat time_)
         : origin(origin_), direction(direction_), time(time_)
     {}
 

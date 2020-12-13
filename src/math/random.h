@@ -93,14 +93,14 @@ inline ::Quaternion Quaternion() {
 
 inline Vec3f PointInsideUnitSphere() {
     Vec3f v = UnitVector();
-    v *= Pow(Random<XFloat>(), 1.0 / 3.0);
+    v *= Pow(Random<XFloat>(), (XFloat)(1.0 / 3.0));
     return v;
 }
 
 inline Vec2f PointInsideUnitCircle() {
     Vec2f v = UnitVec2f();
     // As the volume of the sphere increases (x^3) over an interval we have to increase range as well with x^(1/3)
-    v *= Pow(Random<XFloat>(0.0, 1.0), 1.0 / 2.0);
+    v *= Pow(Random<XFloat>(0.0, 1.0), (XFloat)(1.0 / 2.0));
     return v;
 }
 
